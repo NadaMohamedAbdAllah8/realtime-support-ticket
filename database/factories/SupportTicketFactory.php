@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enum\SupportTicketStatus;
 use App\Models\Admin;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,7 +18,7 @@ class SupportTicketFactory extends Factory
             'customer_name' => $this->faker->name(),
             'subject' => $this->faker->sentence(4),
             'message' => $this->faker->paragraph(),
-            'status' => $this->faker->randomElement(['open', 'pending', 'resolved']),
+            'status' => $this->faker->randomElement(array_column(SupportTicketStatus::cases(), 'value')),
             'assigned_admin_id' => Admin::factory(),
             'admin_response' => $this->faker->optional(0.4)->paragraph(),
         ];
@@ -27,7 +28,7 @@ class SupportTicketFactory extends Factory
     {
         return $this->state(fn() => [
             'assigned_admin_id' => null,
-            'status' => 'open',
+            'status' => SupportTicketStatus::NEW->value,
             'admin_response' => null,
         ]);
     }
@@ -35,7 +36,7 @@ class SupportTicketFactory extends Factory
     public function answered(): static
     {
         return $this->state(fn() => [
-            'status' => 'resolved',
+            'status' => SupportTicketStatus::CLOSED->value,
             'admin_response' => $this->faker->paragraph(),
         ]);
     }

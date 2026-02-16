@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Constants\AuthConstants;
+use App\Constants\Auth;
 use App\Data\Auth\LoginData;
 use App\Data\Auth\LoginResponseData;
 use App\Exceptions\ValidationException;
@@ -29,14 +29,14 @@ class AuthService
 
         return new LoginResponseData(
             token: $token,
-            token_type: AuthConstants::TOKEN_TYPE,
+            token_type: Auth::TOKEN_TYPE,
             admin: $admin
         );
     }
 
     private function getToken(): string
     {
-        return Str::random(AuthConstants::TOKEN_LENGTH);
+        return Str::random(Auth::TOKEN_LENGTH);
     }
 
     private function setAdminToken(Admin $admin, string $token): void
