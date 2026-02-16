@@ -12,7 +12,7 @@ class LoginResource extends JsonResource
         return [
             'token' => $this->token,
             'token_type' => $this->token_type,
-            'user' => new LoggedInAdminResource($this->user),
+            'admin' => new LoggedInAdminResource($this->admin),
         ];
     }
 }

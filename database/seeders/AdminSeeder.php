@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Admin;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,7 +13,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        Admin::query()->updateOrCreate(
             ['email' => 'admin@realtimesupportticket.test'],
             [
                 'name' => 'System Admin',

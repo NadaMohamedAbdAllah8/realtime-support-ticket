@@ -8,6 +8,7 @@ use App\Http\Requests\SupportTicket\StoreSupportTicketRequest;
 use App\Services\SupportTicketService;
 use App\Traits\RespondsWithJson;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SupportTicketController extends Controller
 {
@@ -27,5 +28,12 @@ class SupportTicketController extends Controller
             item: $supportTicket,
             message: 'Support ticket submitted successfully'
         );
+    }
+
+    public function index(Request $request): JsonResponse
+    {
+        $tickets = $this->supportTicketService->getPaginated(request: $request);
+
+        return response()->json($tickets);
     }
 }

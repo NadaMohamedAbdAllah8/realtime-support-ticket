@@ -2,7 +2,7 @@
 
 namespace App\Constants;
 
-class AuthConstants
+class Auth
 {
     public const TOKEN_LENGTH = 60;
 
