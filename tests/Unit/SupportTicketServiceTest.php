@@ -4,6 +4,8 @@ use App\Data\SupportTicket\CreateSupportTicketData;
 use App\Enum\SupportTicketStatus;
 use App\Models\SupportTicket;
 use App\Services\SupportTicketService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -40,4 +42,19 @@ test('create saves support ticket with default values', function (): void {
         'status' => SupportTicketStatus::NEW->value,
         'assigned_admin_id' => null,
     ]);
+});
+
+test('getPaginated returns tickets using requested per page size', function (): void {
+    SupportTicket::factory()->count(12)->create();
+
+    $request = Request::create('/api/admin/support-tickets', 'GET', [
+        'per_page' => 5,
+    ]);
+
+    $paginated = $this->service->getPaginated($request);
+
+    expect($paginated)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect($paginated->perPage())->toBe(5);
+    expect($paginated->total())->toBe(12);
+    expect($paginated->count())->toBe(5);
 });
