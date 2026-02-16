@@ -1,6 +1,6 @@
 <?php
 
-use App\Constants\AuthConstants;
+use App\Constants\Auth;
 use App\Data\Auth\LoginData;
 use App\Data\Auth\LoginResponseData;
 use App\Exceptions\ValidationException;
@@ -39,8 +39,8 @@ test('login success returns response dto and persists token', function (): void 
 
     expect($response)->toBeInstanceOf(LoginResponseData::class);
     expect($response->token)->toBeString();
-    expect(strlen($response->token))->toBe(AuthConstants::TOKEN_LENGTH);
-    expect($response->token_type)->toBe(AuthConstants::TOKEN_TYPE);
+    expect(strlen($response->token))->toBe(Auth::TOKEN_LENGTH);
+    expect($response->token_type)->toBe(Auth::TOKEN_TYPE);
     expect($response->admin)->toBeInstanceOf(Admin::class);
     expect($response->admin->id)->toBe($admin->id);
 
