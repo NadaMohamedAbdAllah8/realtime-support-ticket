@@ -20,7 +20,6 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-
         $loginDto = LoginData::from($request->validated());
 
         $payload = $this->authService->login(credentials: $loginDto);
