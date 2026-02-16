@@ -2,7 +2,6 @@
 
 use App\Models\Admin;
 use App\Models\SupportTicket;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -18,11 +17,8 @@ test('admin support tickets endpoint requires authentication', function (): void
 });
 
 test('admin can view paginated support tickets', function (): void {
-    $token = Str::random(60);
-
-    Admin::factory()->create([
-        'api_token' => $token,
-    ]);
+    $admin = Admin::factory()->create();
+    $token = $admin->createToken('test-admin-token')->plainTextToken;
 
     SupportTicket::factory()->count(18)->create();
 
