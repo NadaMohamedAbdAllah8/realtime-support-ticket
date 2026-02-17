@@ -1,59 +1,184 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Realtime Support Ticket API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12 backend for creating support tickets and notifying admins in real time using Reverb.
 
-## About Laravel
+## Base URL
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Local example: `http://127.0.0.1:8081`
+- All API routes below are prefixed with: `/api`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Authentication
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Admin-only endpoints use Sanctum bearer tokens.
 
-## Learning Laravel
+Auth header format:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```http
+Authorization: Bearer <token>
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Seeded admin credentials (from `database/seeders/AdminSeeder.php`):
 
-## Laravel Sponsors
+- Email: `admin@realtimesupportticket.test`
+- Password: `admin123`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Available Endpoints
 
-### Premium Partners
+### 1. Login (Admin)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- Method: `POST`
+- URL: `/api/login`
+- Auth required: `No`
 
-## Contributing
+Request body:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```json
+{
+  "email": "admin@realtimesupportticket.test",
+  "password": "admin123"
+}
+```
 
-## Code of Conduct
+cURL:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+curl -X POST "http://127.0.0.1:8081/api/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@realtimesupportticket.test",
+    "password": "admin123"
+  }'
+```
 
-## Security Vulnerabilities
+Success response example:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "item": {
+    "token": "1|exampleToken...",
+    "token_type": "Bearer",
+    "admin": {
+      "id": 1,
+      "name": "System Admin",
+      "email": "admin@realtimesupportticket.test"
+    }
+  }
+}
+```
 
-## License
+### 2. Create Support Ticket
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Method: `POST`
+- URL: `/api/support-tickets`
+- Auth required: `No`
+
+Request body:
+
+```json
+{
+  "customer_name": "John Doe",
+  "subject": "Payment issue",
+  "message": "I was charged twice on checkout."
+}
+```
+
+cURL:
+
+```bash
+curl -X POST "http://127.0.0.1:8081/api/support-tickets" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer_name": "John Doe",
+    "subject": "Payment issue",
+    "message": "I was charged twice on checkout."
+  }'
+```
+
+Success response example:
+
+```json
+{
+  "success": true,
+  "message": "Support ticket submitted successfully",
+  "item": {
+    "id": 1,
+    "customer_name": "John Doe",
+    "subject": "Payment issue",
+    "message": "I was charged twice on checkout.",
+    "status": "new",
+    "assigned_admin_id": null,
+    "admin_response": null,
+    "created_at": "2026-02-17T10:00:00.000000Z",
+    "updated_at": "2026-02-17T10:00:00.000000Z"
+  }
+}
+```
+
+Validation errors return HTTP `422`.
+
+### 3. List Support Tickets (Admin)
+
+- Method: `GET`
+- URL: `/api/admin/support-tickets`
+- Auth required: `Yes (Bearer token)`
+
+Optional query params:
+
+- `per_page` (integer)
+
+cURL:
+
+```bash
+curl -X GET "http://127.0.0.1:8081/api/admin/support-tickets?per_page=10" \
+  -H "Authorization: Bearer <token>" \
+  -H "Accept: application/json"
+```
+
+Success response example (Laravel paginator):
+
+```json
+{
+  "current_page": 1,
+  "data": [
+    {
+      "id": 1,
+      "customer_name": "John Doe",
+      "subject": "Payment issue",
+      "message": "I was charged twice on checkout.",
+      "status": "new",
+      "assigned_admin_id": null,
+      "admin_response": null,
+      "created_at": "2026-02-17T10:00:00.000000Z",
+      "updated_at": "2026-02-17T10:00:00.000000Z"
+    }
+  ],
+  "first_page_url": "http://127.0.0.1:8081/api/admin/support-tickets?page=1",
+  "from": 1,
+  "last_page": 1,
+  "last_page_url": "http://127.0.0.1:8081/api/admin/support-tickets?page=1",
+  "links": [],
+  "next_page_url": null,
+  "path": "http://127.0.0.1:8081/api/admin/support-tickets",
+  "per_page": 10,
+  "prev_page_url": null,
+  "to": 1,
+  "total": 1
+}
+```
+
+## Realtime Behavior
+
+When a support ticket is created (`POST /api/support-tickets`), backend dispatches `TicketCreated` and broadcasts it to private channel `admin.inbox`.
+
+Only authenticated admins can subscribe to this private channel.
+
+## Quick Local Run
+
+```bash
+php artisan migrate --seed
+php artisan serve --host=127.0.0.1 --port=8081
+php artisan reverb:start --host=127.0.0.1 --port=8080 --debug
+npm.cmd run dev
+```
