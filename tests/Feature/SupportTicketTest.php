@@ -1,6 +1,8 @@
 <?php
 
+use App\Events\TicketCreated;
 use App\Enum\SupportTicketStatus;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -44,4 +46,22 @@ test('store support ticket endpoint validates required fields', function (): voi
     $response
         ->assertStatus(422)
         ->assertJsonValidationErrors(['customer_name', 'subject', 'message']);
+});
+
+test('store support ticket endpoint broadcasts ticket created event', function (): void {
+    Event::fake([TicketCreated::class]);
+
+    $payload = [
+        'customer_name' => $this->faker->name(),
+        'subject' => $this->faker->sentence(3),
+        'message' => $this->faker->paragraph(),
+    ];
+
+    $this->postJson('/api/support-tickets', $payload)
+        ->assertOk();
+
+    Event::assertDispatched(TicketCreated::class, function (TicketCreated $event): bool {
+        return $event->ticketId > 0
+            && $event->subject !== '';
+    });
 });
