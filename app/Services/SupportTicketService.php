@@ -33,6 +33,7 @@ class SupportTicketService
         $perPage = $request->integer('per_page', Pagination::PER_PAGE);
 
         return SupportTicket::query()
+            ->orderByDesc('id')
             ->paginate($perPage);
     }
 }
