@@ -1,0 +1,87 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rst_app
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
+    env_file:
+      - .env.docker
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8081
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/database/database.sqlite
+      BROADCAST_CONNECTION: reverb
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: sync
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+      VITE_REVERB_HOST: localhost
+      VITE_REVERB_PORT: 8080
+      VITE_REVERB_SCHEME: http
+      VITE_API_BASE_URL: http://localhost:8081/api
+    command: >
+      sh -lc "composer install --no-interaction &&
+      touch database/database.sqlite &&
+      php artisan migrate --force --seed &&
+      apache2-foreground"
+
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rst_reverb
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
+    env_file:
+      - .env.docker
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/database/database.sqlite
+      BROADCAST_CONNECTION: reverb
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: 8080
+      REVERB_HOST: localhost
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+    command: >
+      sh -lc "touch database/database.sqlite &&
+      while [ ! -f vendor/autoload.php ]; do sleep 2; done &&
+      php artisan reverb:start --host=0.0.0.0 --port=8080 --debug"
+
+  frontend:
+    image: node:22-alpine
+    container_name: rst_frontend
+    restart: unless-stopped
+    working_dir: /var/www/html/frontend/real-time-support-tickets
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/var/www/html
+      - frontend_node_modules_data:/var/www/html/frontend/real-time-support-tickets/node_modules
+    depends_on:
+      - app
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    command: >
+      sh -lc "npm install &&
+      npm run dev -- --host=0.0.0.0 --port=5173"
+
+volumes:
+  vendor_data:
+  frontend_node_modules_data:
