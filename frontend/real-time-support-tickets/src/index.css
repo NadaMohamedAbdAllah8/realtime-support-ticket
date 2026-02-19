@@ -1,0 +1,36 @@
+:root {
+  --bg-top: #f1dfc8;
+  --bg-bottom: #f8f4ed;
+  --panel: #fffaf4;
+  --panel-border: #ddc8ad;
+  --text-main: #2b2116;
+  --text-muted: #6c5a47;
+  --input-bg: #fff;
+  --input-border: #bea98e;
+  --input-focus: #b36f21;
+  --button: #1f7a67;
+  --button-hover: #166152;
+  --button-disabled: #8ca59e;
+  --danger: #b5283a;
+  --success: #1d7d45;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(179, 111, 33, 0.16), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(31, 122, 103, 0.14), transparent 36%),
+    linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
+}
+
+#root {
+  min-height: 100vh;
+}
